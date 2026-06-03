@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smash or Pass 🔥</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --pink: #ff3cac;
+    --purple: #784ba0;
+    --blue: #2b86c5;
+    --smash: #ff3cac;
+    --pass: #2b86c5;
+    --bg: #0d0d1a;
+    --card: #161628;
+    --card2: #1e1e38;
+    --text: #f0e6ff;
+    --muted: #8880aa;
+    --border: #2e2e55;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(120, 75, 160, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(255, 60, 172, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 80%, rgba(43, 134, 197, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app { position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,13,26,0.85);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .nav-tabs { display: flex; gap: 8px; }
+
+  .nav-tab {
+    padding: 8px 20px;
+    border-radius: 50px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    transition: all 0.25s;
+  }
+  .nav-tab:hover { border-color: var(--pink); color: var(--pink); }
+  .nav-tab.active {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    border-color: transparent;
+    color: white;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; padding: 32px; max-width: 1100px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  /* ── SETUP ── */
+  .setup-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .setup-card h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, var(--pink), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .friend-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus { border-color: var(--pink); }
+  input[type="text"]::placeholder { color: var(--muted); }
+
+  .btn {
+    padding: 12px 22px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-pink {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white;
+  }
+  .btn-pink:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,60,172,0.35); }
+
+  .btn-blue {
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: white;
+  }
+  .btn-blue:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(43,134,197,0.35); }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-ghost:hover { border-color: var(--pink); color: var(--pink); }
+
+  .friend-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .chip-x {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+  }
+  .chip-x:hover { color: var(--pink); }
+
+  /* ── GAME ── */
+  .game-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .main-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .drop-zone {
+    width: 100%;
+    max-width: 380px;
+    aspect-ratio: 3/4;
+    border-radius: 20px;
+    border: 2.5px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: var(--card2);
+    position: relative;
+    overflow: hidden;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--pink);
+    background: rgba(255,60,172,0.05);
+  }
+
+  .drop-zone img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+  }
+
+  .drop-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .drop-zone:hover .drop-overlay { opacity: 1; }
+
+  .drop-hint {
+    text-align: center;
+    pointer-events: none;
+  }
+  .drop-hint .icon { font-size: 48px; margin-bottom: 8px; }
+  .drop-hint p { color: var(--muted); font-size: 14px; font-weight: 700; }
+  .drop-hint small { color: var(--muted); font-size: 12px; opacity: 0.7; }
+
+  .girl-name-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 380px;
+  }
+
+  /* ── VOTING PANEL ── */
+  .vote-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .vote-panel h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .friend-vote-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    transition: all 0.2s;
+  }
+
+  .friend-vote-item.voted-smash {
+    border-color: var(--pink);
+    background: rgba(255,60,172,0.08);
+  }
+  .friend-vote-item.voted-pass {
+    border-color: var(--blue);
+    background: rgba(43,134,197,0.08);
+  }
+
+  .friend-name { font-weight: 800; font-size: 15px; }
+
+  .vote-btns { display: flex; gap: 6px; }
+
+  .vbtn {
+    padding: 6px 14px;
+    border-radius: 50px;
+    border: 1.5px solid;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    transition: all 0.2s;
+    background: transparent;
+  }
+  .vbtn-smash { border-color: var(--pink); color: var(--pink); }
+  .vbtn-smash:hover, .vbtn-smash.active {
+    background: var(--pink);
+    color: white;
+  }
+  .vbtn-pass { border-color: var(--blue); color: var(--blue); }
+  .vbtn-pass:hover, .vbtn-pass.active {
+    background: var(--blue);
+    color: white;
+  }
+
+  .round-info {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .round-info span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--text);
+    display: block;
+  }
+
+  .submit-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 380px;
+  }
+
+  /* ── RESULTS ── */
+  .results-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .results-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--pink), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .results-header p { color: var(--muted); font-size: 15px; font-weight: 700; margin-top: 6px; }
+
+  .friend-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    justify-content: center;
+  }
+
+  .ftab {
+    padding: 8px 22px;
+    border-radius: 50px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .ftab:hover { border-color: var(--pink); color: var(--pink); }
+  .ftab.active {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    border-color: transparent;
+    color: white;
+  }
+
+  .results-section { margin-bottom: 32px; }
+
+  .results-section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .smash-title { color: var(--pink); }
+  .pass-title { color: var(--blue); }
+
+  .girls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
+  }
+
+  .girl-result-card {
+    background: var(--card2);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    transition: transform 0.2s;
+  }
+  .girl-result-card:hover { transform: translateY(-4px); }
+  .girl-result-card.smash-card { border-color: rgba(255,60,172,0.4); }
+  .girl-result-card.pass-card { border-color: rgba(43,134,197,0.4); }
+
+  .girl-thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+    background: var(--card);
+  }
+
+  .girl-thumb-placeholder {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+  }
+
+  .girl-result-name {
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 800;
+    font-size: 14px;
+    z-index: 9999;
+    transition: transform 0.3s;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── FILE INPUT HIDDEN ── */
+  #fileInput, #pasteInput { display: none; }
+
+  /* ── COUNTER BADGE ── */
+  .counter-badge {
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 1px;
+    padding: 4px 14px;
+    border-radius: 50px;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--purple); }
+
+  @media (max-width: 760px) {
+    .game-layout { grid-template-columns: 1fr; }
+    nav { padding: 14px 16px; }
+    .screen { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+<nav>
+  <div class="logo">SMASH OR PASS</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showScreen('setup')">⚙️ Setup</button>
+    <button class="nav-tab" onclick="showScreen('game')">🎮 Game</button>
+    <button class="nav-tab" onclick="showScreen('results')">📊 Results</button>
+  </div>
+</nav>
+
+<!-- SETUP -->
+<div class="screen active" id="screen-setup">
+  <div class="setup-card">
+    <h2>Add Your Friends</h2>
+    <div class="friend-input-row">
+      <input type="text" id="friendInput" placeholder="Friend's name…" onkeydown="if(event.key==='Enter')addFriend()" />
+      <button class="btn btn-pink" onclick="addFriend()">Add</button>
+    </div>
+    <div class="friend-chips" id="friendChips"></div>
+    <button class="btn btn-blue" style="width:100%;padding:14px" onclick="startGame()">▶ Start Playing</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="screen-game">
+  <div class="game-layout">
+    <div class="main-card">
+      <div class="round-info">
+        Round <span id="roundNum">1</span>
+      </div>
+
+      <!-- Drop zone -->
+      <div class="drop-zone" id="dropZone"
+           ondragover="handleDragOver(event)"
+           ondragleave="handleDragLeave(event)"
+           ondrop="handleDrop(event)"
+           onclick="triggerFileInput()">
+        <div class="drop-hint" id="dropHint">
+          <div class="icon">🖼️</div>
+          <p>Drag & Drop Image Here</p>
+          <small>or click to browse / paste from clipboard</small>
+        </div>
+        <div class="drop-overlay" id="dropOverlay">
+          <span style="font-size:32px">🔄 Change</span>
+        </div>
+      </div>
+
+      <div class="girl-name-row">
+        <input type="text" id="girlName" placeholder="Her name (optional)…" style="flex:1" />
+      </div>
+
+      <div class="submit-row">
+        <button class="btn btn-ghost" style="flex:1" onclick="clearRound()">✕ Clear</button>
+        <button class="btn btn-pink" style="flex:2" onclick="submitRound()">✔ Save & Next Round</button>
+      </div>
+
+      <div style="font-size:12px;color:var(--muted);text-align:center">
+        Tip: You can also paste an image with <kbd style="background:var(--card2);padding:2px 6px;border-radius:4px;font-size:11px">Ctrl+V</kbd>
+      </div>
+    </div>
+
+    <!-- Vote panel -->
+    <div class="vote-panel">
+      <h3>🗳️ Cast Votes</h3>
+      <div id="votingList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="screen-results">
+  <div class="results-header">
+    <h2>📋 Results</h2>
+    <p id="resultsSubtitle">0 girls rated</p>
+  </div>
+  <div class="friend-tabs" id="friendTabs"></div>
+  <div id="resultsContent"></div>
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept="image/*" onchange="handleFileInput(event)" />
+
+<script>
+// ─── STATE ───
+let friends = [];
+let rounds = []; // { girlName, imageDataUrl, votes: {friendName: 'smash'|'pass'} }
+let currentVotes = {}; // friendName => 'smash'|'pass'
+let currentImage = null;
+let currentResultFriend = null;
+
+// ─── SETUP ───
+function addFriend() {
+  const inp = document.getElementById('friendInput');
+  const name = inp.value.trim();
+  if (!name) return;
+  if (friends.includes(name)) { showToast('Already added!'); return; }
+  friends.push(name);
+  inp.value = '';
+  renderChips();
+}
+
+function removeFriend(name) {
+  friends = friends.filter(f => f !== name);
+  renderChips();
+}
+
+function renderChips() {
+  const c = document.getElementById('friendChips');
+  c.innerHTML = friends.map(f => `
+    <div class="chip">
+      ${f}
+      <button class="chip-x" onclick="removeFriend('${f}')" title="Remove">×</button>
+    </div>`).join('');
+}
+
+function startGame() {
+  if (friends.length === 0) { showToast('Add at least one friend first!'); return; }
+  showScreen('game');
+  setupVotingList();
+  updateRoundNum();
+}
+
+// ─── GAME ───
+function setupVotingList() {
+  currentVotes = {};
+  const list = document.getElementById('votingList');
+  list.innerHTML = friends.map(f => `
+    <div class="friend-vote-item" id="vote-item-${CSS.escape(f)}">
+      <span class="friend-name">${f}</span>
+      <div class="vote-btns">
+        <button class="vbtn vbtn-smash" onclick="castVote('${f}','smash')">SMASH 🔥</button>
+        <button class="vbtn vbtn-pass" onclick="castVote('${f}','pass')">PASS ❄️</button>
+      </div>
+    </div>`).join('');
+}
+
+function castVote(friend, vote) {
+  currentVotes[friend] = vote;
+  const item = document.getElementById(`vote-item-${CSS.escape(friend)}`);
+  item.className = `friend-vote-item voted-${vote}`;
+  const btns = item.querySelectorAll('.vbtn');
+  btns[0].classList.toggle('active', vote === 'smash');
+  btns[1].classList.toggle('active', vote === 'pass');
+}
+
+function updateRoundNum() {
+  document.getElementById('roundNum').textContent = rounds.length + 1;
+}
+
+function clearRound() {
+  currentImage = null;
+  document.getElementById('girlName').value = '';
+  const dz = document.getElementById('dropZone');
+  const img = dz.querySelector('img');
+  if (img) img.remove();
+  document.getElementById('dropHint').style.display = '';
+  setupVotingList();
+}
+
+function submitRound() {
+  if (!currentImage) { showToast('Please add an image first!'); return; }
+  const name = document.getElementById('girlName').value.trim() || `Girl #${rounds.length + 1}`;
+  rounds.push({
+    girlName: name,
+    imageDataUrl: currentImage,
+    votes: { ...currentVotes }
+  });
+  showToast(`✔ Saved: ${name}`);
+  clearRound();
+  updateRoundNum();
+}
+
+// ─── DRAG & DROP ───
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.add('drag-over');
+}
+function handleDragLeave(e) {
+  document.getElementById('dropZone').classList.remove('drag-over');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImage(file);
+}
+function triggerFileInput() {
+  document.getElementById('fileInput').click();
+}
+function handleFileInput(e) {
+  const file = e.target.files[0];
+  if (file) loadImage(file);
+  e.target.value = '';
+}
+function loadImage(file) {
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    currentImage = ev.target.result;
+    showImageInDropZone(currentImage);
+  };
+  reader.readAsDataURL(file);
+}
+function showImageInDropZone(src) {
+  const dz = document.getElementById('dropZone');
+  let img = dz.querySelector('img');
+  if (!img) {
+    img = document.createElement('img');
+    dz.appendChild(img);
+  }
+  img.src = src;
+  document.getElementById('dropHint').style.display = 'none';
+}
+
+// Paste support
+document.addEventListener('paste', (e) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      loadImage(item.getAsFile());
+      break;
+    }
+  }
+});
+
+// ─── RESULTS ───
+function renderResults() {
+  const sub = document.getElementById('resultsSubtitle');
+  sub.textContent = `${rounds.length} girl${rounds.length !== 1 ? 's' : ''} rated`;
+
+  const tabs = document.getElementById('friendTabs');
+  if (friends.length === 0) {
+    tabs.innerHTML = '';
+    document.getElementById('resultsContent').innerHTML = '<div class="empty-state">No data yet. Play some rounds first!</div>';
+    return;
+  }
+
+  if (!currentResultFriend || !friends.includes(currentResultFriend)) {
+    currentResultFriend = friends[0];
+  }
+
+  tabs.innerHTML = friends.map(f => `
+    <button class="ftab ${f === currentResultFriend ? 'active' : ''}" onclick="selectResultFriend('${f}')">${f}</button>
+  `).join('');
+
+  renderFriendResults(currentResultFriend);
+}
+
+function selectResultFriend(name) {
+  currentResultFriend = name;
+  renderResults();
+}
+
+function renderFriendResults(friend) {
+  const content = document.getElementById('resultsContent');
+  const smashed = rounds.filter(r => r.votes[friend] === 'smash');
+  const passed = rounds.filter(r => r.votes[friend] === 'pass');
+  const unvoted = rounds.filter(r => !r.votes[friend]);
+
+  const gridHTML = (items, cls) => {
+    if (items.length === 0) return '<div class="empty-state" style="padding:20px">None yet</div>';
+    return `<div class="girls-grid">${items.map(r => `
+      <div class="girl-result-card ${cls}">
+        ${r.imageDataUrl
+          ? `<img class="girl-thumb" src="${r.imageDataUrl}" alt="${r.girlName}" />`
+          : `<div class="girl-thumb-placeholder">👧</div>`}
+        <div class="girl-result-name">${r.girlName}</div>
+      </div>`).join('')}</div>`;
+  };
+
+  content.innerHTML = `
+    <div class="results-section">
+      <div class="results-section-title smash-title">
+        🔥 SMASH <span class="counter-badge">${smashed.length}</span>
+      </div>
+      ${gridHTML(smashed, 'smash-card')}
+    </div>
+    <div class="results-section">
+      <div class="results-section-title pass-title">
+        ❄️ PASS <span class="counter-badge">${passed.length}</span>
+      </div>
+      ${gridHTML(passed, 'pass-card')}
+    </div>
+    ${unvoted.length ? `
+    <div class="results-section">
+      <div class="results-section-title" style="color:var(--muted)">
+        ⏭ NOT VOTED <span class="counter-badge" style="background:var(--muted)">${unvoted.length}</span>
+      </div>
+      ${gridHTML(unvoted, '')}
+    </div>` : ''}
+  `;
+}
+
+// ─── NAVIGATION ───
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${name}`).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    const names = ['setup', 'game', 'results'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  if (name === 'results') renderResults();
+  if (name === 'game' && friends.length > 0) setupVotingList();
+}
+
+// ─── TOAST ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
